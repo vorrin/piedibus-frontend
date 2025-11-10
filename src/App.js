@@ -5,8 +5,10 @@ export default function App() {
   const [attendance, setAttendance] = useState([]);
   const [dayId, setDayId] = useState(null);
   const [date, setDate] = useState("");
-  const [days, setDays] = useState([]); // ✅ store history list
+  const [days, setDays] = useState([]);
   const [viewingPast, setViewingPast] = useState(false);
+
+  const API = process.env.REACT_APP_API_URL.replace(/\/$/, ""); // remove trailing slash
 
   useEffect(() => {
     refreshAttendance();
@@ -14,13 +16,13 @@ export default function App() {
   }, []);
 
   function loadDays() {
-    axios.get(`${process.env.REACT_APP_API_URL}/days`).then((res) => {
+    axios.get(`${API}/days`).then((res) => {
       setDays(res.data);
     });
   }
 
   function refreshAttendance() {
-    axios.get(`${process.env.REACT_APP_API_URL}/attendance/today`).then((res) => {
+    axios.get(`${API}/attendance/today`).then((res) => {
       setViewingPast(false);
       setDayId(res.data.dayId);
       setDate(res.data.date);
@@ -29,7 +31,8 @@ export default function App() {
   }
 
   function loadAttendanceForDay(id) {
-    axios.get(`${process.env.REACT_APP_API_URL}/${id}`).then((res) => {
+    if (!id) return;
+    axios.get(`${API}/attendance/by-day/${id}`).then((res) => {
       setViewingPast(true);
       setDayId(res.data.dayId);
       setDate(res.data.date);
@@ -38,10 +41,10 @@ export default function App() {
   }
 
   function togglePresence(kid) {
-    if (viewingPast) return; // read-only in history mode
+    if (viewingPast) return;
 
     axios
-      .post(`${process.env.REACT_APP_API_URL}/mark`, {
+      .post(`${API}/attendance/mark`, {
         dayId,
         kidId: kid.kid_id,
         present: !kid.present,
@@ -63,7 +66,6 @@ export default function App() {
           : `Attendance for today: ${date}`}
       </h2>
 
-      {/* ✅ Select menu for days */}
       <select onChange={(e) => loadAttendanceForDay(e.target.value)}>
         <option value="">-- View past dates --</option>
         {days.map((d) => (
@@ -105,16 +107,16 @@ export default function App() {
 
 function AddKid({ onAdded }) {
   const [name, setName] = useState("");
+  const API = process.env.REACT_APP_API_URL.replace(/\/$/, "");
 
   function submit() {
     if (!name.trim()) return;
-    axios.post(`${process.env.REACT_APP_API_URL}/kids`, { name }).then(() => {
+    axios.post(`${API}/kids`, { name }).then(() => {
       setName("");
       onAdded();
     });
   }
 
-  
   return (
     <div style={{ marginTop: 20 }}>
       <h3>Add Kid</h3>
