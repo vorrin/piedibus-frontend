@@ -122,6 +122,51 @@ function AddKid({ onAdded, API }) {
     });
   };
 
+
+
+  function ManageKids({ onDeleted, API }) {
+  const [kids, setKids] = useState([]);
+
+  const loadKids = () => {
+    axios.get(`${API}/kids`).then((res) => setKids(res.data));
+  };
+
+  const deleteKid = (id) => {
+    if (!window.confirm("Are you sure you want to delete this kid?")) return;
+    axios.delete(`${API}/kids/${id}`).then(() => {
+      loadKids();
+      if (onDeleted) onDeleted();
+    });
+  };
+
+  useEffect(() => {
+    loadKids();
+  }, []);
+
+  return (
+    <div style={{ marginTop: 20 }}>
+      <h3>Manage Kids</h3>
+      {kids.map((kid) => (
+        <div
+          key={kid.id}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: 8,
+            border: "1px solid #ccc",
+            borderRadius: 6,
+            marginBottom: 4,
+          }}
+        >
+          <span>{kid.name}</span>
+          <button onClick={() => deleteKid(kid.id)}>❌</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
   return (
     <div style={{ marginTop: 20 }}>
       <h3>Add Kid</h3>
@@ -131,6 +176,7 @@ function AddKid({ onAdded, API }) {
         placeholder="Kid name"
       />
       <button onClick={submit}>Add</button>
+      {!viewingPast && <ManageKids onDeleted={refreshAttendance} API={API} />}
     </div>
   );
 }
