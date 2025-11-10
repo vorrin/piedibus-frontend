@@ -121,6 +121,7 @@ function AddKid({ onAdded, API }) {
       onAdded();
     });
   };
+}
 
 
 
@@ -179,4 +180,3 @@ function AddKid({ onAdded, API }) {
       {!viewingPast && <ManageKids onDeleted={refreshAttendance} API={API} />}
     </div>
   );
-}
