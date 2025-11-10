@@ -105,7 +105,7 @@ export default function App() {
         </div>
       ))}
 
-      {!viewingPast && <AddKid onAdded={refreshAttendance} API={API} />}
+      {!viewingPast && <AddKid API={API} onAdded={refreshAttendance} />}
     </div>
   );
 }
@@ -132,7 +132,7 @@ function AddKid({ onAdded, API }) {
         placeholder="Kid name"
       />
       <button onClick={submit}>Add</button>
-      <ManageKids onDeleted={onAdded} API={API} />
+      <ManageKids API={API} onDeleted={onAdded} />
     </div>
   );
 }
@@ -142,9 +142,9 @@ function AddKid({ onAdded, API }) {
 function ManageKids({ onDeleted, API }) {
   const [kids, setKids] = useState([]);
 
-  const loadKids = () => {
+  const loadKids = useCallback(() => {
     axios.get(`${API}/kids`).then((res) => setKids(res.data));
-  };
+  }, [API]);
 
   const deleteKid = (id) => {
     if (!window.confirm("Are you sure you want to delete this kid?")) return;
@@ -156,7 +156,7 @@ function ManageKids({ onDeleted, API }) {
 
   useEffect(() => {
     loadKids();
-  }, []);
+  }, [loadKids]);
 
   return (
     <div style={{ marginTop: 20 }}>
