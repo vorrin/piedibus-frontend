@@ -14,13 +14,13 @@ export default function App() {
   }, []);
 
   function loadDays() {
-    axios.get("http://localhost:3001/days").then((res) => {
+    axios.get(`${process.env.REACT_APP_API_URL}/days`).then((res) => {
       setDays(res.data);
     });
   }
 
   function refreshAttendance() {
-    axios.get("http://localhost:3001/attendance/today").then((res) => {
+    axios.get(`${process.env.REACT_APP_API_URL}/today`).then((res) => {
       setViewingPast(false);
       setDayId(res.data.dayId);
       setDate(res.data.date);
@@ -29,7 +29,7 @@ export default function App() {
   }
 
   function loadAttendanceForDay(id) {
-    axios.get(`http://localhost:3001/attendance/by-day/${id}`).then((res) => {
+    axios.get(`${process.env.REACT_APP_API_URL}/${id}`).then((res) => {
       setViewingPast(true);
       setDayId(res.data.dayId);
       setDate(res.data.date);
@@ -41,7 +41,7 @@ export default function App() {
     if (viewingPast) return; // read-only in history mode
 
     axios
-      .post("http://localhost:3001/attendance/mark", {
+      .post(`${process.env.REACT_APP_API_URL}/mark`, {
         dayId,
         kidId: kid.kid_id,
         present: !kid.present,
@@ -108,7 +108,7 @@ function AddKid({ onAdded }) {
 
   function submit() {
     if (!name.trim()) return;
-    axios.post("http://localhost:3001/kids", { name }).then(() => {
+    axios.post(`${process.env.REACT_APP_API_URL}/kids`, { name }).then(() => {
       setName("");
       onAdded();
     });
