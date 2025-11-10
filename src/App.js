@@ -1,22 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { useCallback } from "react";
-
-const refreshAttendance = useCallback(() => {
-  axios.get(`${API}/attendance/today`).then((res) => {
-    setViewingPast(false);
-    setDayId(res.data.dayId);
-    setDate(res.data.date);
-    setAttendance(res.data.attendance || []);
-  });
-}, [API]);
-
-const loadDays = useCallback(() => {
-  axios.get(`${API}/days`).then((res) => {
-    setDays(res.data);
-  });
-}, [API]);
-
 
 export default function App() {
   const [attendance, setAttendance] = useState([]);
@@ -25,30 +8,26 @@ export default function App() {
   const [days, setDays] = useState([]);
   const [viewingPast, setViewingPast] = useState(false);
 
-  const API = process.env.REACT_APP_API_URL.replace(/\/$/, ""); // remove trailing slash
+  const API = process.env.REACT_APP_API_URL.replace(/\/$/, "");
 
-useEffect(() => {
-  refreshAttendance();
-  loadDays();
-}, [refreshAttendance, loadDays]);
+  // ------------------ Functions ------------------
 
-
-  function loadDays() {
-    axios.get(`${API}/days`).then((res) => {
-      setDays(res.data);
-    });
-  }
-
-  function refreshAttendance() {
+  const refreshAttendance = useCallback(() => {
     axios.get(`${API}/attendance/today`).then((res) => {
       setViewingPast(false);
       setDayId(res.data.dayId);
       setDate(res.data.date);
       setAttendance(res.data.attendance || []);
     });
-  }
+  }, [API]);
 
-  function loadAttendanceForDay(id) {
+  const loadDays = useCallback(() => {
+    axios.get(`${API}/days`).then((res) => {
+      setDays(res.data);
+    });
+  }, [API]);
+
+  const loadAttendanceForDay = (id) => {
     if (!id) return;
     axios.get(`${API}/attendance/by-day/${id}`).then((res) => {
       setViewingPast(true);
@@ -56,9 +35,9 @@ useEffect(() => {
       setDate(res.data.date);
       setAttendance(res.data.attendance || []);
     });
-  }
+  };
 
-  function togglePresence(kid) {
+  const togglePresence = (kid) => {
     if (viewingPast) return;
 
     axios
@@ -74,7 +53,16 @@ useEffect(() => {
           )
         );
       });
-  }
+  };
+
+  // ------------------ Effects ------------------
+
+  useEffect(() => {
+    refreshAttendance();
+    loadDays();
+  }, [refreshAttendance, loadDays]);
+
+  // ------------------ Render ------------------
 
   return (
     <div style={{ padding: 20, fontFamily: "sans-serif" }}>
@@ -118,22 +106,21 @@ useEffect(() => {
         </div>
       ))}
 
-      {!viewingPast && <AddKid onAdded={refreshAttendance} />}
+      {!viewingPast && <AddKid onAdded={refreshAttendance} API={API} />}
     </div>
   );
 }
 
-function AddKid({ onAdded }) {
+function AddKid({ onAdded, API }) {
   const [name, setName] = useState("");
-  const API = process.env.REACT_APP_API_URL.replace(/\/$/, "");
 
-  function submit() {
+  const submit = () => {
     if (!name.trim()) return;
     axios.post(`${API}/kids`, { name }).then(() => {
       setName("");
       onAdded();
     });
-  }
+  };
 
   return (
     <div style={{ marginTop: 20 }}>
