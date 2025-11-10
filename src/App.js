@@ -1,5 +1,22 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useCallback } from "react";
+
+const refreshAttendance = useCallback(() => {
+  axios.get(`${API}/attendance/today`).then((res) => {
+    setViewingPast(false);
+    setDayId(res.data.dayId);
+    setDate(res.data.date);
+    setAttendance(res.data.attendance || []);
+  });
+}, [API]);
+
+const loadDays = useCallback(() => {
+  axios.get(`${API}/days`).then((res) => {
+    setDays(res.data);
+  });
+}, [API]);
+
 
 export default function App() {
   const [attendance, setAttendance] = useState([]);
@@ -10,10 +27,11 @@ export default function App() {
 
   const API = process.env.REACT_APP_API_URL.replace(/\/$/, ""); // remove trailing slash
 
-  useEffect(() => {
-    refreshAttendance();
-    loadDays();
-  }, []);
+useEffect(() => {
+  refreshAttendance();
+  loadDays();
+}, [refreshAttendance, loadDays]);
+
 
   function loadDays() {
     axios.get(`${API}/days`).then((res) => {
