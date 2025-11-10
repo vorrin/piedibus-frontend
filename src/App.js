@@ -39,7 +39,6 @@ export default function App() {
 
   const togglePresence = (kid) => {
     if (viewingPast) return;
-
     axios
       .post(`${API}/attendance/mark`, {
         dayId,
@@ -111,6 +110,8 @@ export default function App() {
   );
 }
 
+// ------------------ AddKid Component ------------------
+
 function AddKid({ onAdded, API }) {
   const [name, setName] = useState("");
 
@@ -121,11 +122,24 @@ function AddKid({ onAdded, API }) {
       onAdded();
     });
   };
+
+  return (
+    <div style={{ marginTop: 20 }}>
+      <h3>Add Kid</h3>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Kid name"
+      />
+      <button onClick={submit}>Add</button>
+      <ManageKids onDeleted={onAdded} API={API} />
+    </div>
+  );
 }
 
+// ------------------ ManageKids Component ------------------
 
-
-  function ManageKids({ onDeleted, API }) {
+function ManageKids({ onDeleted, API }) {
   const [kids, setKids] = useState([]);
 
   const loadKids = () => {
@@ -167,16 +181,3 @@ function AddKid({ onAdded, API }) {
     </div>
   );
 }
-
-  return (
-    <div style={{ marginTop: 20 }}>
-      <h3>Add Kid</h3>
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Kid name"
-      />
-      <button onClick={submit}>Add</button>
-      {!viewingPast && <ManageKids onDeleted={refreshAttendance} API={API} />}
-    </div>
-  );
