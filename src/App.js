@@ -9,7 +9,7 @@ export default function App() {
   const [viewingPast, setViewingPast] = useState(false);
   const [kidsChanged, setKidsChanged] = useState(false);
 
-  const API = process.env.REACT_APP_API_URL.replace(/\/$/, "");
+  const API = process.env.REACT_APP_API_URL?.replace(/\/$/, "");
 
   // ------------------ Functions ------------------
 
@@ -37,7 +37,7 @@ export default function App() {
   };
 
   const togglePresence = (kid) => {
-    if (viewingPast) return; // read-only in history
+    if (viewingPast) return; // read-only for history
     axios
       .post(`${API}/attendance/mark`, {
         dayId,
@@ -87,23 +87,27 @@ export default function App() {
       <br />
 
       {/* ------------------ Attendance List ------------------ */}
-      {attendance.map((kid) => (
-        <div
-          key={kid.kid_id}
-          onClick={() => togglePresence(kid)}
-          style={{
-            padding: 12,
-            marginBottom: 8,
-            borderRadius: 6,
-            cursor: viewingPast ? "not-allowed" : "pointer",
-            border: "1px solid #ccc",
-            background: kid.present ? "#d4ffd4" : "#ffe9e9",
-            opacity: viewingPast ? 0.7 : 1,
-          }}
-        >
-          {kid.name} — {kid.present ? "✅ Present" : "⬜ Absent"}
-        </div>
-      ))}
+      {attendance.length === 0 ? (
+        <p>No kids found for this day.</p>
+      ) : (
+        attendance.map((kid) => (
+          <div
+            key={kid.kid_id}
+            onClick={() => togglePresence(kid)}
+            style={{
+              padding: 12,
+              marginBottom: 8,
+              borderRadius: 6,
+              cursor: viewingPast ? "not-allowed" : "pointer",
+              border: "1px solid #ccc",
+              background: kid.present ? "#d4ffd4" : "#ffe9e9",
+              opacity: viewingPast ? 0.7 : 1,
+            }}
+          >
+            {kid.name} — {kid.present ? "✅ Present" : "⬜ Absent"}
+          </div>
+        ))
+      )}
 
       {/* ------------------ Add / Manage Kids ------------------ */}
       {!viewingPast && (
@@ -138,7 +142,7 @@ function AddKid({ onAdded, API }) {
     if (!name.trim()) return;
     axios.post(`${API}/kids`, { name }).then(() => {
       setName("");
-      if (onAdded) onAdded();
+      onAdded?.();
     });
   };
 
@@ -168,7 +172,7 @@ function ManageKids({ onDeleted, API, triggerReload }) {
     if (!window.confirm("Are you sure you want to delete this kid?")) return;
     axios.delete(`${API}/kids/${id}`).then(() => {
       loadKids();
-      if (onDeleted) onDeleted();
+      onDeleted?.();
     });
   };
 
@@ -176,75 +180,15 @@ function ManageKids({ onDeleted, API, triggerReload }) {
     loadKids();
   }, [loadKids, triggerReload]);
 
- return (
-  <div style={{ padding: 20, fontFamily: "sans-serif" }}>
-    {/* --- Header: Today / Past Date --- */}
-    <h2>
-      {viewingPast
-        ? `Viewing history: ${date}`
-        : `Attendance for today: ${date}`}
-    </h2>
-
-    {/* --- Select past day --- */}
-    <select onChange={(e) => loadAttendanceForDay(e.target.value)}>
-      <option value="">-- View past dates --</option>
-      {days.map((d) => (
-        <option key={d.id} value={d.id}>
-          {d.date}
-        </option>
+  return (
+    <div style={{ marginTop: 30 }}>
+      <h3>Manage Kids</h3>
+      {kids.map((kid) => (
+        <div key={kid.id} style={{ marginBottom: 8 }}>
+          {kid.name}{" "}
+          <button onClick={() => deleteKid(kid.id)}>Delete</button>
+        </div>
       ))}
-    </select>
-
-    <button onClick={refreshAttendance} style={{ marginLeft: 10 }}>
-      Today
-    </button>
-
-    <br />
-    <br />
-
-    {/* ------------------ Attendance List ------------------ */}
-    {!viewingPast && attendance.length > 0 && (
-      <div style={{ marginBottom: 20 }}>
-        <h3>Mark Attendance for Today</h3>
-        {attendance.map((kid) => (
-          <div
-            key={kid.kid_id}
-            onClick={() => togglePresence(kid)}
-            style={{
-              padding: 12,
-              marginBottom: 8,
-              borderRadius: 6,
-              cursor: "pointer",
-              border: "1px solid #ccc",
-              background: kid.present ? "#d4ffd4" : "#ffe9e9",
-            }}
-          >
-            {kid.name} — {kid.present ? "✅ Present" : "⬜ Absent"}
-          </div>
-        ))}
-      </div>
-    )}
-
-    {/* ------------------ Add / Manage Kids ------------------ */}
-    {!viewingPast && (
-      <>
-        <AddKid
-          API={API}
-          onAdded={() => {
-            refreshAttendance();
-            setKidsChanged((c) => !c);
-          }}
-        />
-        <ManageKids
-          API={API}
-          onDeleted={() => {
-            refreshAttendance();
-            setKidsChanged((c) => !c);
-          }}
-          triggerReload={kidsChanged}
-        />
-      </>
-    )}
-  </div>
-);
+    </div>
+  );
 }
