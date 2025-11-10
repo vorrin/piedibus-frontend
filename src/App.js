@@ -203,7 +203,7 @@ function ManageKids({ onDeleted, API, triggerReload }) {
     <br />
 
     {/* ------------------ Attendance List ------------------ */}
-{!viewingPast && attendance.length > 0 && (
+{!viewingPast && (
   <div style={{ marginBottom: 20 }}>
     <h3>Mark Attendance for Today</h3>
     {attendance.map((kid) => (
