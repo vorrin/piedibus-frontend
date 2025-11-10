@@ -20,7 +20,7 @@ export default function App() {
   }
 
   function refreshAttendance() {
-    axios.get(`${process.env.REACT_APP_API_URL}/today`).then((res) => {
+    axios.get(`${process.env.REACT_APP_API_URL}/attendance/today`).then((res) => {
       setViewingPast(false);
       setDayId(res.data.dayId);
       setDate(res.data.date);
