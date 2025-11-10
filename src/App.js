@@ -7,7 +7,7 @@ export default function App() {
   const [date, setDate] = useState("");
   const [days, setDays] = useState([]);
   const [viewingPast, setViewingPast] = useState(false);
-  const [kidsChanged, setKidsChanged] = useState(false); // trigger reload for ManageKids
+  const [kidsChanged, setKidsChanged] = useState(false);
 
   const API = process.env.REACT_APP_API_URL.replace(/\/$/, "");
 
@@ -23,9 +23,7 @@ export default function App() {
   }, [API]);
 
   const loadDays = useCallback(() => {
-    axios.get(`${API}/days`).then((res) => {
-      setDays(res.data);
-    });
+    axios.get(`${API}/days`).then((res) => setDays(res.data));
   }, [API]);
 
   const loadAttendanceForDay = (id) => {
@@ -39,7 +37,7 @@ export default function App() {
   };
 
   const togglePresence = (kid) => {
-    if (viewingPast) return;
+    if (viewingPast) return; // read-only in history
     axios
       .post(`${API}/attendance/mark`, {
         dayId,
@@ -88,6 +86,7 @@ export default function App() {
       <br />
       <br />
 
+      {/* ------------------ Attendance List ------------------ */}
       {attendance.map((kid) => (
         <div
           key={kid.kid_id}
@@ -106,6 +105,7 @@ export default function App() {
         </div>
       ))}
 
+      {/* ------------------ Add / Manage Kids ------------------ */}
       {!viewingPast && (
         <>
           <AddKid
@@ -115,17 +115,21 @@ export default function App() {
               setKidsChanged((c) => !c);
             }}
           />
-          <ManageKids API={API} onDeleted={() => {
-            refreshAttendance();
-            setKidsChanged((c) => !c);
-          }} triggerReload={kidsChanged} />
+          <ManageKids
+            API={API}
+            onDeleted={() => {
+              refreshAttendance();
+              setKidsChanged((c) => !c);
+            }}
+            triggerReload={kidsChanged}
+          />
         </>
       )}
     </div>
   );
 }
 
-// ------------------ AddKid Component ------------------
+// ------------------ AddKid ------------------
 
 function AddKid({ onAdded, API }) {
   const [name, setName] = useState("");
@@ -151,7 +155,7 @@ function AddKid({ onAdded, API }) {
   );
 }
 
-// ------------------ ManageKids Component ------------------
+// ------------------ ManageKids ------------------
 
 function ManageKids({ onDeleted, API, triggerReload }) {
   const [kids, setKids] = useState([]);
@@ -170,7 +174,7 @@ function ManageKids({ onDeleted, API, triggerReload }) {
 
   useEffect(() => {
     loadKids();
-  }, [loadKids, triggerReload]); // reload when kidsChanged flips
+  }, [loadKids, triggerReload]);
 
   return (
     <div style={{ marginTop: 20 }}>
