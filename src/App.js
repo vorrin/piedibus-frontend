@@ -203,30 +203,27 @@ function ManageKids({ onDeleted, API, triggerReload }) {
     <br />
 
     {/* ------------------ Attendance List ------------------ */}
-{!viewingPast && (
-  <div style={{ marginBottom: 20 }}>
-    <h3>Mark Attendance for Today</h3>
-    {attendance.map((kid) => (
-      <div
-        key={kid.kid_id}
-        onClick={() => togglePresence(kid)}
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: 12,
-          marginBottom: 8,
-          borderRadius: 6,
-          cursor: "pointer",
-          border: "1px solid #ccc",
-          background: kid.present ? "#d4ffd4" : "#ffe9e9",
-        }}
-      >
-        <span>{kid.name}</span>
-        <span>{kid.present ? "✅ Present" : "⬜ Absent"}</span>
+    {!viewingPast && attendance.length > 0 && (
+      <div style={{ marginBottom: 20 }}>
+        <h3>Mark Attendance for Today</h3>
+        {attendance.map((kid) => (
+          <div
+            key={kid.kid_id}
+            onClick={() => togglePresence(kid)}
+            style={{
+              padding: 12,
+              marginBottom: 8,
+              borderRadius: 6,
+              cursor: "pointer",
+              border: "1px solid #ccc",
+              background: kid.present ? "#d4ffd4" : "#ffe9e9",
+            }}
+          >
+            {kid.name} — {kid.present ? "✅ Present" : "⬜ Absent"}
+          </div>
+        ))}
       </div>
-    ))}
-  </div>
-)}
+    )}
 
     {/* ------------------ Add / Manage Kids ------------------ */}
     {!viewingPast && (
